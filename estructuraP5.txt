@@ -1,0 +1,98 @@
+
+Óscar Morujo Fernández 3ºA
+
+ESTRUCTURA DEL CÓDIGO
+=====================
+
+-PACKAGE CLIENT_SRC:
+
+	-Clase Client: extiende a Thread y en su método run ejecuta o modo gui o modo batch según se le haya indicado.
+		Si estamos en modo Batch utilizamos un semáforo para que el cliente espere hasta que le llega la 
+		confirmación de conexion a su OyenteServidor.En caso de que el id de usuario elegido esté repetido,
+		el OS le dirá que elija otro nombre y volverá a intentar la conexión.
+		Si estamos en modo Gui avisará a controlPanel para ejeutar el cambio de nombre y el reintento de 
+		conexión.
+
+	-Clase Emisor: hilo encargado de enviar el archivo en una comunicación P2P
+
+	-Clase Receptor: hilo encargado de recibir el archivo de una comunicación P2P
+
+	-Clase OSobserver: interfaz que se usará para avisar a la gui de cambios en cliente
+
+	-Clase OyenteServer:consta de los siguientes métodos:
+		-private void reintentarConexion(MsgErrorConexion msg): indica al usuario que debe de cambiar su id
+		-private void enviarArchivo(MsgEmitirFichero msg): lanza el  emisor y crea un server socket en el que
+			espera al usuario que ha solicitado el archivo. El ServerSocket le metemos como arguento un 0, para 
+			que el propio emisor se encargue de buscar un puerto valido para la comunicación
+		-private void recibirArchivo(MsgPreparadoSC msg): lanza el receptor pasándole los datos del "servidor"( es decir
+			el cliente emisor de la comunicación P2P)
+		-private void printInfoUsuarios(ArrayList<Usuario> usuarios): muestra por salida en consola la tabla de informa-
+			ción de los usuarios
+		-public void addObserver(OSobserver o): es llamada por los elementos de la gui que quieren ser observadores.
+	
+
+------------------------------------------------------------------------
+
+-PACKAGE GUI:
+	-ClientMainWindow: crea la ventana de la gui
+	-ControlPanel: botones superiores para interactuar
+	-Download: información de una descarga(nombre del archivo y tamaño)
+	-DownloadsTable: tabla de descargas del cliente
+	-DownloadsTableModel
+	-TableFiles: objetos que tienen un nombre de archivo y el usuario al que le pertenece
+	-UsersTable: tabla de TableFiles que en cada fila tiene un archivo y su propietario
+	-UsersTableModel
+
+-----------------------------------------------------------------------------
+
+-PACKAGE LAUNCHER:
+	-MainClient: ejecuta el programa del cliente(thread). Los argumentos son:
+		- args[0]->ip_server, args[1]->puerto_server, args[2]-> ip_cliente,  args[3]-> "GUI o BATCH"
+
+	-MainServer: ejecuta el programa del server(thread).Los argumentos son:
+		-args[0]-> ip_server,args[1]->puerto_server
+
+---------------------------------------------------------------------------
+
+-PACKAGE MSG_SRC: contiene los mensajes que intercambiarán clientes y servidor. Además de los que se indican en la
+	práctica tenemos otros mensajes como MsgErrorConexión para indicar que el id que ha elegido el usuario esta
+	repetido. Tambien tenemos MsgAñadirArchivo y MsgConfirmación añadir archivo para añadir tus archivos disponibles
+	para compartir al servidor.
+
+---------------------------------------------------------------------------
+
+-PACKAGE SERVER_SRC:
+	-MonitorServer: contiene la tabla de información de usuarios y la tabla con sus flujos.Controla el acceso
+		en exclusión mutua para cada una de las tablas con la ayuda de 2 locks(funciones comentadas en código)
+	
+	-OyenteClient:Consta de los siguientes métodos:
+		-private void añadirArchivo(MsgAñadirArchivo msg): añade el archivo indicado al servidor si es posible
+
+		-private void realizarConexion(MsgConexion msg): comprueba que el id_usuario no este repetido, lo añade a
+			las tablas del servidor y envia mensaje de confirmacion de conexion. Si el usuario esta repetido
+			envía mensaje error conexión.
+
+		-private void cerrarConexion(MsgCerrarConexion msg): cierra los flujos del usuario y borra su información
+			de las tablas y envía mensaje de confirmacion de cerrar conexión
+
+		-private void avisarPeerEmisor(MsgPedirFichero msg): busca el dueño del archivo solicitado y le envia un
+			mensaje por su flujo con la orden de que el cliente emita su archivo a quien lo haya solicitado
+			(mensaje emitir fichero)
+
+		-private void avisarPeerReceptor(MsgPreparadoCS msg): avisa al receptor de que la comunicación P2P está preparada
+			(busca los flujos del usuario receptor y le envia un mensaje de preparado servidor cliente
+
+	-Server: las funciones del server las maneja su MonitorServer.
+
+----------------------------------------------------------------------------
+
+-PACKAGE USERS_SRC:
+	-FlujosUsuario: contiene los flujos del usuario que almacenará el servidor junto a su id(Nos es útil para
+		la comunicación p2p)
+
+	-Usuario: contiene los datos de un usuario que se almacenarán en el servidor(id, ip y su arraylist de
+		archivos disponibles)
+
+	-File: el arraylist mencionado anteriormente contiene instancias de esta clase(cada archivo tiene de información
+		su ruta y su nombre.
+

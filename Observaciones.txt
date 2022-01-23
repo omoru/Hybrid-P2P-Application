@@ -1,0 +1,12 @@
+MODO BATCH
+==========
+
+-Si quieres añadir un fichero a tus archivos disponibles, deberás indicar tanto el nombre de archivo como la ruta. Es recomendable tener los archivos a compartir en la carpeta
+src del proyecto( así por ejemplo si queremos añadir el archivo file.txt, indicaremos el nombre como file.txt, y además la ruta en este caso será también file.txt)
+
+-Como funciona por hilos, aunque te muestre información por consola puedes seguir introducciendo opciones a realizar del menú
+
+MODO GUI
+==========
+-En la tabla de usuarios conectados apareceran aquellos que esten conectados(menos el propio cliente, que no estara visible para si mismo)
+-Para descargar un archivo pincha encima de el en la tabla y te preguntará el nombre del archivo con el que lo quieres guardar
